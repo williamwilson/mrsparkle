@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Sparkle.Message>
+
+<h2>@ViewBag.Tag</h2>
+<table>
+    <tr>
+        <th>
+            Time
+        </th>
+        <th>
+            Room
+        </th>
+        <th>
+            From
+        </th>
+        <th style="width: 80%">
+            Body
+        </th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @String.Format("{0:g}", item.Time)
+        </td>
+        <td>
+            <a href="@Url.Content("~/room/" + @item.Room + "/" + @item.Time.Year + "/" + @item.Time.Month + "/" + @item.Time.Day + "?mid=" + @item.ID)">
+            @item.Room
+            </a>
+        </td>
+        <td>
+            @Html.ColorName(item.From)
+        </td>
+        <td>
+            @Html.LinkifyTags(Url, item.Body)
+        </td>
+    </tr>
+}
+
+</table>
+

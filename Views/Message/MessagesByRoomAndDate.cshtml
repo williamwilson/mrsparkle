@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Sparkle.Message>
+
+<h2>@ViewBag.Room</h2>
+<h3>@String.Format("{0:d}", @ViewBag.Date)</h3>
+<table width="100%">
+    <tr>
+        <th>
+            Time
+        </th>
+        <th>
+            From
+        </th>
+        <th style="width: 80%">
+            Body
+        </th>
+    </tr>
+@{
+    int count = 0;   
+}
+@foreach (var item in Model) {
+    <tr class="@(item.ID.Equals(ViewBag.MessageID, StringComparison.InvariantCultureIgnoreCase) ? "highlight":(count % 2 == 1 ? "altrow" : ""))">
+        <td>
+            @String.Format("{0:t}", item.Time)
+        </td>
+        <td>
+            @Html.ColorName(item.From)
+        </td>
+        <td>
+            @Html.LinkifyTags(Url, item.Body)
+        </td>        
+    </tr>
+    count++;
+}
+</table>
+
