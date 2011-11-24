@@ -29,11 +29,13 @@ namespace Sparkle.Controllers
                 MessageRepository repository = new MessageRepository();
                 if (repository.InsertMessage(message))
                 {
+                    Log.DebugFormat("Message '{0}' created successfully.  Processing tags.", message.ID);
                     /* if the message is successfully created, parse it for any hashtags
                      * and insert them as needed */
                     IEnumerable<string> hashTags = GetHashTags(message.Body);
                     foreach (string tag in hashTags)
                     {
+                        Log.DebugFormat("Creating tag for message. message: '{0}' tag: '{1}'", message.ID, tag);
                         repository.InsertHashTag(tag, message);
                     }
                 }
