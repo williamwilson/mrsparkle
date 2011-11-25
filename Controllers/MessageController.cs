@@ -100,6 +100,18 @@ namespace Sparkle.Controllers
             try
             {
                 MessageRepository repository = new MessageRepository();
+                if (year < 0)
+                {
+                    year = DateTime.Now.Year;
+                }
+                if (month < 0)
+                {
+                    month = DateTime.Now.Month;
+                }
+                if (day < 0)
+                {
+                    day = DateTime.Now.Day;
+                }
                 DateTime date = new DateTime(year, month, day);
                 IEnumerable<Message> messages = repository.GetMessagesByRoomAndDate(room, date);
                 ViewBag.Title = string.Format("{0}: {1} < mrsparkle", room, date.ToShortDateString());

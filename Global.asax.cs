@@ -38,9 +38,9 @@ namespace sparkle
                 new { controller = "Message", 
                     action = "MessagesByRoomAndDate", 
                     room = "", 
-                    year = DateTime.Now.Year, 
-                    month = DateTime.Now.Month, 
-                    day = DateTime.Now.Day
+                    year = -1, 
+                    month = -1, 
+                    day = -1
                 }
             );
 
