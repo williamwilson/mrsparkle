@@ -6,6 +6,7 @@ using System.Web.Routing;
 using System.Collections.Generic;
 using System;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace Sparkle.Models
 {
@@ -28,7 +29,7 @@ namespace Sparkle.Models
             int hue = name.GetHashCode() % 360;
 
             /* have a standard saturation and value (or lightness) */
-            double saturation = 0.7d;
+            double saturation = 0.8d;
             double value = 0.9d;
             double chroma = value * saturation;
 
@@ -90,42 +91,105 @@ namespace Sparkle.Models
         /// <param name="urlHelper">The UrlHelper for the current request.</param>
         /// <param name="body">The body of the message to process.</param>
         /// <returns>A string containing encoded HTML representing the body of the message with links created for each hash tag.</returns>
-        public static IHtmlString LinkifyTags(this HtmlHelper html, UrlHelper urlHelper, string body)
+        public static IHtmlString Linkify(this HtmlHelper html, UrlHelper urlHelper, string body)
         {
             StringBuilder linkified = new StringBuilder();
-            StringBuilder tag = new StringBuilder();
-            Dictionary<string, object> linkHtmlAttributes = new Dictionary<string, object>();
-            linkHtmlAttributes.Add("style", "taglink");
+            StringBuilder word = new StringBuilder();
 
-            int index = body.IndexOf('#', 0);
-            int endOfLastTag = 0;
-            while (index >= 0)
+            for (int i = 0; i < body.Length; i++)
             {
-                linkified.Append(body.Substring(0, index));
-
-                tag.Clear();
-                int c;
-                for (c = index + 1; c < body.Length; c++)
+                if (char.IsWhiteSpace(body[i]))
                 {
-                    if (char.IsWhiteSpace(body[c]))
-                    {
-                        break;
-                    }
+                    /* process word */
+                    ProcessWord(html, linkified, word);
 
-                    tag.Append(body[c]);
+                    linkified.Append(body[i]);
+                    word.Clear();
+                    continue;
                 }
-                endOfLastTag = c;
 
-                RouteValueDictionary routingValues = new RouteValueDictionary();
-                routingValues.Add("tag", tag.ToString());
-                linkified.Append(html.ActionLink("#" + tag.ToString(), "MessagesByTag", "Message", routingValues, linkHtmlAttributes).ToHtmlString());
-
-                index = body.IndexOf('#', index + 1);
+                word.Append(body[i]);
             }
 
-            linkified.Append(body.Substring(endOfLastTag));
+            /* process the last word */
+            ProcessWord(html, linkified, word);
+
+            //int index = body.IndexOf('#', 0);
+            //int endOfLastTag = 0;
+            //while (index >= 0)
+            //{
+            //    linkified.Append(body.Substring(0, index));
+
+            //    tag.Clear();
+            //    int c;
+            //    for (c = index + 1; c < body.Length; c++)
+            //    {
+            //        if (char.IsWhiteSpace(body[c]))
+            //        {
+            //            break;
+            //        }
+
+            //        tag.Append(body[c]);
+            //    }
+            //    endOfLastTag = c;
+
+            //    RouteValueDictionary routingValues = new RouteValueDictionary();
+            //    routingValues.Add("tag", tag.ToString());
+            //    linkified.Append(html.ActionLink("#" + tag.ToString(), "MessagesByTag", "Message", routingValues, linkHtmlAttributes).ToHtmlString());
+
+            //    index = body.IndexOf('#', index + 1);
+            //}
+
+            //linkified.Append(body.Substring(endOfLastTag));
 
             return html.Raw(linkified.ToString());
+        }
+
+        private static readonly Regex NumericRegex = new Regex("^[0-9]*$", RegexOptions.Compiled);
+        private static readonly Dictionary<string, object> TagLinkHtmlAttributes = new Dictionary<string, object>();
+
+        static MessageHelper()
+        {
+            TagLinkHtmlAttributes.Add("style", "taglink");
+        }
+
+        private static void ProcessWord(HtmlHelper html, StringBuilder linkified, StringBuilder word)
+        {
+            if (word.Length > 0)
+            {
+                string wordString = word.ToString();
+                if (wordString.StartsWith("#") && wordString.Length > 1)
+                {
+                    RouteValueDictionary routingValues = new RouteValueDictionary();
+                    routingValues.Add("tag", wordString.Substring(1));
+                    linkified.Append(html.ActionLink(wordString, "MessagesByTag", "Message", routingValues, TagLinkHtmlAttributes).ToHtmlString());
+
+                    if (wordString.Length >= 6 && wordString.Length <= 8)
+                    {
+                        if (NumericRegex.IsMatch(wordString.Substring(1)))
+                        {
+                            AddScrLink(linkified, wordString.Substring(1));
+                        }
+                    }
+                }
+                else
+                {
+                    linkified.Append(word.ToString());
+                }
+
+                if (wordString.Length >= 5 && wordString.Length <= 7)
+                {
+                    if (NumericRegex.IsMatch(wordString))
+                    {
+                        AddScrLink(linkified, wordString);
+                    }
+                }
+            }
+        }
+
+        private static void AddScrLink(StringBuilder linkified, string number)
+        {
+            linkified.Append(string.Format("<a href=\"http://ceros/workview/checkSession/openObject.aspx?scrid={0}\" target=\"about:blank\"><img src=\"/Content/images/page_white_go.png\" alt=\"open SCR\" border=\"0\" /></a>", number));
         }
     }
 }
