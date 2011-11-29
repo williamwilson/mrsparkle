@@ -101,7 +101,7 @@ namespace Sparkle.Models
                 if (char.IsWhiteSpace(body[i]))
                 {
                     /* process word */
-                    ProcessWord(html, linkified, word);
+                    ProcessWord(html, urlHelper, linkified, word);
 
                     linkified.Append(body[i]);
                     word.Clear();
@@ -112,7 +112,7 @@ namespace Sparkle.Models
             }
 
             /* process the last word */
-            ProcessWord(html, linkified, word);
+            ProcessWord(html, urlHelper, linkified, word);
 
             //int index = body.IndexOf('#', 0);
             //int endOfLastTag = 0;
@@ -153,7 +153,7 @@ namespace Sparkle.Models
             TagLinkHtmlAttributes.Add("style", "taglink");
         }
 
-        private static void ProcessWord(HtmlHelper html, StringBuilder linkified, StringBuilder word)
+        private static void ProcessWord(HtmlHelper html, UrlHelper urlHelper, StringBuilder linkified, StringBuilder word)
         {
             if (word.Length > 0)
             {
@@ -168,7 +168,7 @@ namespace Sparkle.Models
                     {
                         if (NumericRegex.IsMatch(wordString.Substring(1)))
                         {
-                            AddScrLink(linkified, wordString.Substring(1));
+                            AddScrLink(linkified, urlHelper, wordString.Substring(1));
                         }
                     }
                 }
@@ -181,15 +181,15 @@ namespace Sparkle.Models
                 {
                     if (NumericRegex.IsMatch(wordString))
                     {
-                        AddScrLink(linkified, wordString);
+                        AddScrLink(linkified, urlHelper, wordString);
                     }
                 }
             }
         }
 
-        private static void AddScrLink(StringBuilder linkified, string number)
+        private static void AddScrLink(StringBuilder linkified, UrlHelper urlHelper, string number)
         {
-            linkified.Append(string.Format("<a href=\"http://ceros/workview/checkSession/openObject.aspx?scrid={0}\" target=\"about:blank\"><img src=\"/Content/images/page_white_go.png\" alt=\"open SCR\" border=\"0\" /></a>", number));
+            linkified.Append(string.Format("<a href=\"http://ceros/workview/checkSession/openObject.aspx?scrid={0}\" target=\"about:blank\"><img src=\"" + urlHelper.Content("~/Content/images/page_white_go.png") + "\" alt=\"open SCR\" border=\"0\" /></a>", number));
         }
     }
 }
