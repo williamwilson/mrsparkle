@@ -117,6 +117,8 @@ namespace Sparkle.Controllers
                 ViewBag.Title = string.Format("{0}: {1} < mrsparkle", room, date.ToShortDateString());
                 ViewBag.Room = room;
                 ViewBag.Date = date;
+                ViewBag.NextDate = date.AddDays(1);
+                ViewBag.PreviousDate = date.AddDays(-1);
                 ViewBag.MessageID = mid;
                 return View(messages);
             }
